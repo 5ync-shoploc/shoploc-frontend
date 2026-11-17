@@ -55,9 +55,9 @@ jobs:
             - name: TypeScript Check
               run: npm run typecheck
 
-    # --------------------------------
+    # -------------------------------
     # 2. SECURITY AUDIT
-    # --------------------------------
+    # -------------------------------
     security:
         name: Security Audit
         runs-on: ubuntu-latest
