@@ -1,0 +1,112 @@
+
+name: Sakai React - Professional CI
+
+on:
+    push:
+        branches:
+            - main
+            - develop
+
+    pull_request:
+        branches:
+            - main
+            - develop
+
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+env:
+    NEXT_TELEMETRY_DISABLED: 1
+
+jobs:
+
+    # --------------------------------
+    # 1. CODE QUALITY
+    # --------------------------------
+    quality:
+        name: Code Quality
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: npm
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: ESLint
+              run: npm run lint
+
+            - name: Prettier Check
+              run: npm run format:check
+
+            - name: TypeScript Check
+              run: npm run typecheck
+
+    # -------------------------------
+    # 2. SECURITY AUDIT
+    # -------------------------------
+    security:
+        name: Security Audit
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: npm
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: NPM Security Audit
+              run: npm audit --audit-level=high
+
+    # --------------------------------
+    # 3. PRODUCTION BUILD
+    # --------------------------------
+    build:
+        name: Next.js Production Build
+        runs-on: ubuntu-latest
+        needs:
+            - quality
+            - security
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: npm
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Build Next.js application
+              run: npm run build
+
+            - name: Upload build artifact
+              uses: actions/upload-artifact@v4
+              with:
+                  name: nextjs-production-build
+                  path: .next/
+                  retention-days: 7
