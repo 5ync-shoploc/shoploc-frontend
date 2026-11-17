@@ -2,14 +2,20 @@
   "name": "sakai-react",
   "version": "10.1.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "format": "prettier --write \"{app,demo,layout,types}/**/*.{js,ts,tsx,d.ts}\"",
-    "lint": "next lint"
-  },
-  "dependencies": {
+
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+
+        "format": "prettier --write \"{app,demo,layout,types}/**/*.{js,ts,tsx,d.ts}\"",
+        "format:check": "prettier --check \"{app,demo,layout,types}/**/*.{js,ts,tsx,d.ts}\"",
+
+        "lint": "next lint",
+        "typecheck": "tsc --noEmit"
+    },
+
+    "dependencies": {
     "@types/node": "20.3.1",
     "@types/react": "18.2.12",
     "@types/react-dom": "18.2.5",
