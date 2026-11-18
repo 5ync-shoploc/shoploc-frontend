@@ -6,14 +6,33 @@ import { LayoutContext } from './context/layoutcontext';
 import { MenuProvider } from './context/menucontext';
 import Link from 'next/link';
 import { AppMenuItem } from '@/types';
+import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
 
 const AppMenu = () => {
     const { layoutConfig } = useContext(LayoutContext);
+    const { user } = useCurrentUser();
+    const isClient = user?.role === 'CLIENT';
+    const isMerchant = user?.role === 'COMMERCANT';
 
     const model: AppMenuItem[] = [
         {
             label: 'Home',
             items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', to: '/' }]
+        },
+        // ---------- ShopLoc ----------
+        // Chaque service ajoute ici les entrées de ses écrans (visibles selon le rôle de l'utilisateur).
+        {
+            label: 'Mes achats',
+            visible: isClient,
+            items: [
+                { label: 'Passer une commande', icon: 'pi pi-fw pi-shopping-cart', to: '/commandes/nouvelle' },
+                { label: 'Mes commandes', icon: 'pi pi-fw pi-list', to: '/commandes' }
+            ]
+        },
+        {
+            label: 'Mon commerce',
+            visible: isMerchant,
+            items: [{ label: 'Commandes à préparer', icon: 'pi pi-fw pi-inbox', to: '/commercant/commandes' }]
         },
         {
             label: 'UI Components',
