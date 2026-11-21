@@ -25,6 +25,10 @@ export default function OrderDetailPage() {
         let cancelled = false;
         setOrder(null);
         setError(null);
+        if (!Number.isInteger(orderId) || orderId <= 0) {
+            setError('Commande introuvable.');
+            return;
+        }
         getMyOrder(user, orderId)
             .then((data) => !cancelled && setOrder(data))
             .catch((e) => {

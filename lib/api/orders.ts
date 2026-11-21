@@ -14,25 +14,45 @@ export interface OrderItem {
 }
 
 export interface Order {
-    id: number;
+    /** null pour un panier vide pas encore créé. */
+    id: number | null;
     clientId: string;
     status: OrderStatus;
     totalAmount: number;
-    orderDate: string;
+    orderDate: string | null;
     pickupSlot: string | null;
     paymentId: number | null;
     items: OrderItem[];
 }
 
-export interface CreateOrderRequest {
-    items: { productId: number; quantity: number }[];
-    /** Date et heure locales au format "AAAA-MM-JJTHH:mm:ss", ou null. */
-    pickupSlot: string | null;
+// ---------- Panier (commande au statut PANIER) ----------
+
+/** Mon panier (vide s'il n'existe pas encore). */
+export function getCart(user: CurrentUser | null): Promise<Order> {
+    return apiFetch<Order>('/api/order/cart', user);
 }
 
-/** US1 : passer une commande (rôle CLIENT). */
-export function createOrder(user: CurrentUser | null, request: CreateOrderRequest): Promise<Order> {
-    return apiFetch<Order>('/api/order', user, { method: 'POST', body: JSON.stringify(request) });
+/** Ajouter un article au panier (les quantités s'additionnent si l'article y est déjà). */
+export function addToCart(user: CurrentUser | null, productId: number, quantity = 1): Promise<Order> {
+    return apiFetch<Order>('/api/order/cart/items', user, { method: 'POST', body: JSON.stringify({ productId, quantity }) });
+}
+
+/** Changer la quantité d'un article du panier. */
+export function updateCartItem(user: CurrentUser | null, productId: number, quantity: number): Promise<Order> {
+    return apiFetch<Order>(`/api/order/cart/items/${productId}`, user, { method: 'PUT', body: JSON.stringify({ quantity }) });
+}
+
+/** Retirer un article du panier. */
+export function removeCartItem(user: CurrentUser | null, productId: number): Promise<Order> {
+    return apiFetch<Order>(`/api/order/cart/items/${productId}`, user, { method: 'DELETE' });
+}
+
+/**
+ * Valider le panier : il devient une commande EN_ATTENTE (prix figés, stock décrémenté).
+ * @param pickupSlot date et heure locales au format "AAAA-MM-JJTHH:mm:ss", ou null
+ */
+export function validateCart(user: CurrentUser | null, pickupSlot: string | null): Promise<Order> {
+    return apiFetch<Order>('/api/order/cart/validate', user, { method: 'POST', body: JSON.stringify({ pickupSlot }) });
 }
 
 /** US2 : liste de mes commandes (rôle CLIENT). */
