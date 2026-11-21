@@ -1,23 +1,34 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Message } from 'primereact/message';
+import { Toast } from 'primereact/toast';
 import OrderStatusTag from '@/components/order/OrderStatusTag';
 import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
 import { ApiError, formatDate, formatPrice } from '@/lib/api/http';
 import { listMyOrders, type Order } from '@/lib/api/orders';
 
-/** US2 : un client consulte la liste de ses commandes avec leur statut. */
+/** US2 : un client consulte la liste de ses commandes avec leur statut (le panier est dans sa propre page). */
 export default function MyOrdersPage() {
     const { user, ready } = useCurrentUser();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const toast = useRef<Toast>(null);
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    // arrivée depuis le panier juste après la validation
+    useEffect(() => {
+        if (searchParams.get('validee')) {
+            toast.current?.show({ severity: 'success', summary: 'Commande passée', detail: 'Votre panier a été validé.' });
+            router.replace('/commandes');
+        }
+    }, [searchParams, router]);
 
     useEffect(() => {
         if (!ready) return;
@@ -25,7 +36,8 @@ export default function MyOrdersPage() {
         setLoading(true);
         setError(null);
         listMyOrders(user)
-            .then((data) => !cancelled && setOrders(data))
+            // le panier (statut PANIER) n'est pas encore une commande : il est affiché dans Mon panier
+            .then((data) => !cancelled && setOrders(data.filter((o) => o.status !== 'PANIER')))
             .catch((e) => !cancelled && setError(e instanceof ApiError ? e.message : 'Erreur inattendue.'))
             .finally(() => !cancelled && setLoading(false));
         return () => {
@@ -35,9 +47,10 @@ export default function MyOrdersPage() {
 
     return (
         <div className="card">
+            <Toast ref={toast} />
             <div className="flex justify-content-between align-items-center mb-3">
                 <h5 className="m-0">Mes commandes</h5>
-                <Button label="Nouvelle commande" icon="pi pi-plus" onClick={() => router.push('/commandes/nouvelle')} />
+                <Button label="Mon panier" icon="pi pi-shopping-cart" outlined onClick={() => router.push('/panier')} />
             </div>
 
             {error && <Message severity="error" className="mb-3 w-full justify-content-start" text={error} />}

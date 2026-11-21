@@ -24,10 +24,7 @@ const AppMenu = () => {
         {
             label: 'Mes achats',
             visible: isClient,
-            items: [
-                { label: 'Passer une commande', icon: 'pi pi-fw pi-shopping-cart', to: '/commandes/nouvelle' },
-                { label: 'Mes commandes', icon: 'pi pi-fw pi-list', to: '/commandes' }
-            ]
+            items: [{ label: 'Mon panier et mes commandes', icon: 'pi pi-fw pi-shopping-cart', to: '/commandes' }]
         },
         {
             label: 'Mon commerce',
