@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
-import { Button } from 'primereact/button';
+import TableSearch, { matchesSearch } from '@/components/common/TableSearch';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Message } from 'primereact/message';
@@ -10,6 +10,7 @@ import OrderNumber from '@/components/order/OrderNumber';
 import OrderStatusTag from '@/components/order/OrderStatusTag';
 import StatCard from '@/components/dashboard/StatCard';
 import type { CurrentUser } from '@/lib/auth/CurrentUserContext';
+import { orderSearchValues } from '@/lib/order/search';
 import { ApiError, formatDate, formatPrice } from '@/lib/api/http';
 import { listMyOrders, type Order } from '@/lib/api/orders';
 
@@ -20,6 +21,7 @@ export default function ClientDashboard({ user, catalogCount }: { user: CurrentU
     const router = useRouter();
     const [orders, setOrders] = useState<Order[] | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [search, setSearch] = useState('');
 
     useEffect(() => {
         let cancelled = false;
@@ -37,7 +39,6 @@ export default function ClientDashboard({ user, catalogCount }: { user: CurrentU
     const cart = all.find((o) => o.status === 'PANIER');
     const placed = all.filter((o) => o.status !== 'PANIER');
     const inProgress = placed.filter((o) => IN_PROGRESS.includes(o.status));
-    const ready = placed.filter((o) => o.status === 'PRETE');
     const cartCount = cart?.items.reduce((n, i) => n + i.quantity, 0) ?? 0;
     const spent = placed.reduce((sum, o) => sum + o.totalAmount, 0);
     const loading = orders === null && !error;
@@ -47,19 +48,19 @@ export default function ClientDashboard({ user, catalogCount }: { user: CurrentU
         <>
             {error && <Message severity="error" className="mb-3 w-full justify-content-start" text={error} />}
             <div className="grid">
-                <StatCard title="Mon panier" value={show(`${cartCount} article${cartCount > 1 ? 's' : ''}`)} icon="pi-shopping-cart" color="blue" hint={cart ? `${formatPrice(cart.totalAmount)} à valider` : 'Panier vide'} href="/panier" />
-                <StatCard title="Commandes en cours" value={show(inProgress.length)} icon="pi-clock" color="orange" hint={ready.length ? `${ready.length} prête${ready.length > 1 ? 's' : ''} à retirer` : 'Aucune prête à retirer'} href="/commandes" />
-                <StatCard title="Total commandé" value={show(formatPrice(spent))} icon="pi-wallet" color="green" hint={`${placed.length} commande${placed.length > 1 ? 's' : ''}`} />
-                <StatCard title="Articles au catalogue" value={catalogCount} icon="pi-shopping-bag" color="purple" hint="Découvrir les commerces" href="/catalogue" />
+                <StatCard title="Dans mon panier" value={show(cartCount)} icon="pi-shopping-cart" color="blue" href="/panier" />
+                <StatCard title="Commandes en cours" value={show(inProgress.length)} icon="pi-clock" color="orange" href="/commandes" />
+                <StatCard title="Total commandé" value={show(formatPrice(spent))} icon="pi-wallet" color="green" />
+                <StatCard title="Articles en vente" value={catalogCount} icon="pi-shopping-bag" color="purple" href="/catalogue" />
 
                 <div className="col-12">
                     <div className="card">
                         <div className="flex justify-content-between align-items-center mb-3">
                             <h5 className="m-0">Mes dernières commandes</h5>
-                            <Button label="Toutes mes commandes" text onClick={() => router.push('/commandes')} />
+                            <TableSearch value={search} onChange={setSearch} />
                         </div>
                         <DataTable
-                            value={placed.slice(0, 5)}
+                            value={search ? placed.filter((o) => matchesSearch(search, orderSearchValues(o))) : placed.slice(0, 5)}
                             dataKey="id"
                             loading={loading}
                             emptyMessage="Aucune commande pour l'instant."

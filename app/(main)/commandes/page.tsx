@@ -8,12 +8,14 @@ import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { DataTable } from 'primereact/datatable';
 import { Message } from 'primereact/message';
 import { Toast } from 'primereact/toast';
+import TableSearch, { matchesSearch } from '@/components/common/TableSearch';
 import OrderNumber from '@/components/order/OrderNumber';
 import OrderStatusTag from '@/components/order/OrderStatusTag';
 import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
 import { ApiError, formatDate, formatPrice } from '@/lib/api/http';
 import { cancelMyOrder, listMyOrders, type Order } from '@/lib/api/orders';
 import { formatOrderNumber } from '@/lib/order/format';
+import { orderSearchValues } from '@/lib/order/search';
 
 /** US2 : un client consulte la liste de ses commandes avec leur statut (le panier est dans sa propre page). */
 export default function MyOrdersPage() {
@@ -24,6 +26,7 @@ export default function MyOrdersPage() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [search, setSearch] = useState('');
 
     // arrivée depuis le panier juste après la validation
     useEffect(() => {
@@ -97,12 +100,24 @@ export default function MyOrdersPage() {
             <ConfirmDialog />
             <div className="flex justify-content-between align-items-center mb-3">
                 <h5 className="m-0">Mes commandes</h5>
-                <Button label="Mon panier" icon="pi pi-shopping-cart" outlined onClick={() => router.push('/panier')} />
+                <div className="flex align-items-center gap-2">
+                    <TableSearch value={search} onChange={setSearch} placeholder="N°, date, statut…" />
+                    <Button label="Mon panier" icon="pi pi-shopping-cart" outlined onClick={() => router.push('/panier')} />
+                </div>
             </div>
 
             {error && <Message severity="error" className="mb-3 w-full justify-content-start" text={error} />}
 
-            <DataTable value={orders} dataKey="id" loading={loading} emptyMessage="Aucune commande pour l'instant." selectionMode="single" onRowClick={(e) => router.push(`/commandes/${(e.data as Order).id}`)} rowHover responsiveLayout="scroll">
+            <DataTable
+                value={orders.filter((o) => matchesSearch(search, orderSearchValues(o)))}
+                dataKey="id"
+                loading={loading}
+                emptyMessage={search ? 'Aucune commande ne correspond à la recherche.' : "Aucune commande pour l'instant."}
+                selectionMode="single"
+                onRowClick={(e) => router.push(`/commandes/${(e.data as Order).id}`)}
+                rowHover
+                responsiveLayout="scroll"
+            >
                 <Column header="Commande" body={(o: Order) => <OrderNumber id={o.id} />} />
                 <Column header="Date" body={(o: Order) => formatDate(o.orderDate)} />
                 <Column header="Statut" body={(o: Order) => <OrderStatusTag status={o.status} />} />

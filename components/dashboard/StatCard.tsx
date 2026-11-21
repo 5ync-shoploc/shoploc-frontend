@@ -5,26 +5,24 @@ interface StatCardProps {
     title: string;
     value: React.ReactNode;
     icon: string;
-    /** Couleur PrimeFlex de l'icône : blue, orange, green, cyan, purple, red... */
+    /** Couleur PrimeFlex : blue, orange, green, cyan, purple, red... */
     color: string;
-    hint?: React.ReactNode;
     href?: string;
 }
 
-/** Carte de chiffre clé du tableau de bord. */
-export default function StatCard({ title, value, icon, color, hint, href }: StatCardProps) {
+/** Carte de chiffre clé du tableau de bord : icône douce à gauche, grand chiffre à droite. */
+export default function StatCard({ title, value, icon, color, href }: StatCardProps) {
     const card = (
-        <div className="card mb-0 h-full">
-            <div className="flex justify-content-between mb-3">
-                <div>
-                    <span className="block text-500 font-medium mb-3">{title}</span>
-                    <div className="text-900 font-medium text-xl">{value}</div>
-                </div>
-                <div className={`flex align-items-center justify-content-center bg-${color}-100 border-round`} style={{ width: '2.5rem', height: '2.5rem' }}>
-                    <i className={`pi ${icon} text-${color}-500 text-xl`} />
+        <div className="card mb-0 h-full flex align-items-center gap-3">
+            <div className={`flex align-items-center justify-content-center flex-shrink-0 bg-${color}-50 border-round-xl`} style={{ width: '3.5rem', height: '3.5rem' }}>
+                <i className={`pi ${icon} text-${color}-400`} style={{ fontSize: '1.5rem' }} />
+            </div>
+            <div className="min-w-0">
+                <div className="text-500 font-medium text-sm mb-1">{title}</div>
+                <div className="text-900 font-bold white-space-nowrap" style={{ fontSize: '2rem', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>
+                    {value}
                 </div>
             </div>
-            {hint && <span className="text-500">{hint}</span>}
         </div>
     );
     return (

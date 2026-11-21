@@ -6,12 +6,14 @@ import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Message } from 'primereact/message';
+import TableSearch, { matchesSearch } from '@/components/common/TableSearch';
 import OrderNumber from '@/components/order/OrderNumber';
 import OrderStatusTag from '@/components/order/OrderStatusTag';
 import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
 import { ApiError, formatDate, formatPrice } from '@/lib/api/http';
 import { listMerchantOrders, type MerchantOrderSummary } from '@/lib/api/orders';
 import { clientName } from '@/lib/order/format';
+import { orderSearchValues } from '@/lib/order/search';
 
 /** US3 : un commerçant voit la liste des commandes qui contiennent ses articles. */
 export default function MerchantOrdersPage() {
@@ -20,6 +22,7 @@ export default function MerchantOrdersPage() {
     const [orders, setOrders] = useState<MerchantOrderSummary[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [search, setSearch] = useState('');
 
     useEffect(() => {
         if (!ready) return;
@@ -39,16 +42,18 @@ export default function MerchantOrdersPage() {
 
     return (
         <div className="card">
-            <h5>Commandes à préparer</h5>
-            <p className="text-500">Les articles et le total ne concernent que vos produits.</p>
+            <div className="flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <h5 className="m-0">Commandes à préparer</h5>
+                <TableSearch value={search} onChange={setSearch} placeholder="N°, client, statut…" />
+            </div>
 
             {error && <Message severity="error" className="mb-3 w-full justify-content-start" text={error} />}
 
             <DataTable
-                value={orders}
+                value={orders.filter((o) => matchesSearch(search, orderSearchValues({ ...o, id: o.orderId })))}
                 dataKey="orderId"
                 loading={loading}
-                emptyMessage="Aucune commande ne contient vos articles pour l'instant."
+                emptyMessage={search ? 'Aucune commande ne correspond à la recherche.' : "Aucune commande ne contient vos articles pour l'instant."}
                 selectionMode="single"
                 onRowClick={(e) => open(e.data as MerchantOrderSummary)}
                 rowHover
