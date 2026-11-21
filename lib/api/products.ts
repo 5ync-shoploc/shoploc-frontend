@@ -26,3 +26,7 @@ export interface PageResponse<T> {
 export function listProducts(page: number, size: number): Promise<PageResponse<Product>> {
     return apiFetch<PageResponse<Product>>(`/api/products?page=${page}&size=${size}&sort=name,asc`, null);
 }
+
+export function getProduct(id: number): Promise<Product> {
+    return apiFetch<Product>(`/api/products/${id}`, null);
+}
