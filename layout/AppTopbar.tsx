@@ -1,5 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
-
 import Link from 'next/link';
 import { classNames } from 'primereact/utils';
 import React, { forwardRef, useContext, useImperativeHandle, useRef } from 'react';
@@ -9,7 +7,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { DEMO_USERS, useCurrentUser } from '@/lib/auth/CurrentUserContext';
 
 const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
-    const { layoutConfig, layoutState, onMenuToggle, showProfileSidebar } = useContext(LayoutContext);
+    const { layoutState, onMenuToggle, showProfileSidebar } = useContext(LayoutContext);
     const { user, setUser } = useCurrentUser();
     const menubuttonRef = useRef(null);
     const topbarmenuRef = useRef(null);
@@ -24,8 +22,9 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     return (
         <div className="layout-topbar">
             <Link href="/" className="layout-topbar-logo">
-                <img src={`/layout/images/logo-${layoutConfig.colorScheme !== 'light' ? 'white' : 'dark'}.svg`} width="47.22px" height={'35px'} alt="logo" />
-                <span>ShopLoc</span>
+                <span className="font-bold" style={{ letterSpacing: '0.12em' }}>
+                    SHOPLOC
+                </span>
             </Link>
 
             <button ref={menubuttonRef} type="button" className="p-link layout-menu-button layout-topbar-button" onClick={onMenuToggle}>

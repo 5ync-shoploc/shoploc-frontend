@@ -27,10 +27,7 @@ export default function Dashboard() {
 
     return (
         <>
-            <div className="mb-4">
-                <h4 className="mb-1">Bonjour {user?.id ?? ''}</h4>
-                <span className="text-500">{user?.role === 'COMMERCANT' ? 'Voici l’activité de votre commerce.' : user?.role === 'CLIENT' ? 'Voici où en sont vos achats.' : 'Bienvenue sur ShopLoc.'}</span>
-            </div>
+            <h4 className="mb-4">Bonjour {user?.id ?? ''}</h4>
 
             {user?.role === 'CLIENT' && <ClientDashboard user={user} catalogCount={catalogCount} />}
             {user?.role === 'COMMERCANT' && <MerchantDashboard user={user} catalogCount={catalogCount} />}
