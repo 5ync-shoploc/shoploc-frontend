@@ -57,15 +57,11 @@ export default function OrderDetailPage() {
                         Commande n° {order.id} <OrderStatusTag status={order.status} />
                     </h5>
                     <div className="grid mb-3">
-                        <div className="col-12 md:col-4">
+                        <div className="col-12 md:col-6">
                             <span className="text-500">Passée le</span>
                             <div>{formatDate(order.orderDate)}</div>
                         </div>
-                        <div className="col-12 md:col-4">
-                            <span className="text-500">Créneau de retrait</span>
-                            <div>{formatDate(order.pickupSlot)}</div>
-                        </div>
-                        <div className="col-12 md:col-4">
+                        <div className="col-12 md:col-6">
                             <span className="text-500">Paiement</span>
                             <div>{order.paymentId ? `n° ${order.paymentId}` : 'Non payée'}</div>
                         </div>
