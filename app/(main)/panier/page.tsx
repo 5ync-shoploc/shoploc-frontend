@@ -4,26 +4,20 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
-import { Calendar } from 'primereact/calendar';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { InputNumber } from 'primereact/inputnumber';
 import { Message } from 'primereact/message';
 import { Skeleton } from 'primereact/skeleton';
 import { Toast } from 'primereact/toast';
+import ProductImage from '@/components/catalog/ProductImage';
 import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
 import { ApiError, formatPrice } from '@/lib/api/http';
 import { getCart, removeCartItem, updateCartItem, validateCart, type Order, type OrderItem } from '@/lib/api/orders';
 
-/** Date locale -> "AAAA-MM-JJTHH:mm:00" (format attendu par l'API, sans fuseau horaire). */
-function toLocalDateTime(date: Date): string {
-    const pad = (n: number) => String(n).padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:00`;
-}
-
 const errorMessage = (e: unknown) => (e instanceof ApiError ? e.message : 'Erreur inattendue.');
 
-/** Mon panier : modifier les quantités, retirer des articles, choisir un créneau et valider. */
+/** Mon panier : modifier les quantités, retirer des articles et valider. */
 export default function CartPage() {
     const { user, ready } = useCurrentUser();
     const router = useRouter();
@@ -31,7 +25,6 @@ export default function CartPage() {
     const [cart, setCart] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [pickupSlot, setPickupSlot] = useState<Date | null>(null);
     const [busy, setBusy] = useState(false);
 
     const load = useCallback(async () => {
@@ -67,7 +60,7 @@ export default function CartPage() {
     const validate = async () => {
         setBusy(true);
         try {
-            await validateCart(user, pickupSlot ? toLocalDateTime(pickupSlot) : null);
+            await validateCart(user, null); // créneau de retrait : pas encore proposé
             // la commande est passée : on l'affiche dans Mes commandes
             router.push('/commandes?validee=1');
         } catch (e) {
@@ -93,6 +86,13 @@ export default function CartPage() {
             disabled={busy}
             aria-label={`Quantité de ${item.productName}`}
         />
+    );
+
+    // Emplacement de l'image de l'article (icône par défaut tant que l'API ne renvoie pas d'image)
+    const imageTemplate = (item: OrderItem) => (
+        <div style={{ width: '4rem' }} className="border-round overflow-hidden">
+            <ProductImage product={{ name: item.productName, imageUrl: item.imageUrl ?? null, available: true }} height="4rem" />
+        </div>
     );
 
     const removeTemplate = (item: OrderItem) => <Button icon="pi pi-trash" rounded text severity="danger" aria-label={`Retirer ${item.productName}`} disabled={busy} onClick={() => runCartAction(() => removeCartItem(user, item.productId))} />;
@@ -123,6 +123,7 @@ export default function CartPage() {
             ) : (
                 <>
                     <DataTable value={items} dataKey="productId" responsiveLayout="scroll">
+                        <Column header="" body={imageTemplate} style={{ width: '5rem' }} />
                         <Column field="productName" header="Article" />
                         <Column header="Prix" body={(i: OrderItem) => formatPrice(i.unitPrice)} />
                         <Column header="Quantité" body={quantityTemplate} />
@@ -130,17 +131,12 @@ export default function CartPage() {
                         <Column body={removeTemplate} />
                     </DataTable>
 
-                    <div className="flex flex-wrap align-items-end gap-4 mt-4">
-                        <div className="flex flex-column gap-2">
-                            <label htmlFor="pickupSlot">Créneau de retrait (facultatif)</label>
-                            <Calendar inputId="pickupSlot" value={pickupSlot} onChange={(e) => setPickupSlot((e.value as Date) ?? null)} showTime hourFormat="24" minDate={new Date()} showIcon dateFormat="dd/mm/yy" />
-                        </div>
+                    <div className="flex flex-wrap justify-content-end align-items-center gap-4 mt-4">
                         <div className="text-xl">
                             Total : <strong>{formatPrice(cart?.totalAmount ?? 0)}</strong>
                         </div>
-                        <Button label="Valider le panier" icon="pi pi-check" onClick={validate} loading={busy} />
+                        <Button label="Valider mon panier" icon="pi pi-check" onClick={validate} loading={busy} />
                     </div>
-                    <p className="text-500 mt-3 mb-0">Les prix et le stock sont vérifiés auprès des commerçants au moment de la validation.</p>
                 </>
             )}
         </div>

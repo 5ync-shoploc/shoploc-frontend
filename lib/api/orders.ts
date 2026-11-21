@@ -7,6 +7,8 @@ export type OrderStatus = 'PANIER' | 'EN_ATTENTE' | 'VALIDEE' | 'PRETE' | 'RETIR
 export interface OrderItem {
     productId: number;
     productName: string;
+    /** Image de l'article : pas encore renvoyée par l'order-service (emplacement prêt dans le panier). */
+    imageUrl?: string | null;
     merchantId: string;
     quantity: number;
     unitPrice: number;

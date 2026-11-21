@@ -61,7 +61,6 @@ export default function MyOrdersPage() {
                 <Column header="Statut" body={(o: Order) => <OrderStatusTag status={o.status} />} />
                 <Column header="Articles" body={(o: Order) => o.items.reduce((n, i) => n + i.quantity, 0)} />
                 <Column header="Total" body={(o: Order) => formatPrice(o.totalAmount)} />
-                <Column header="Retrait" body={(o: Order) => formatDate(o.pickupSlot)} />
                 <Column body={(o: Order) => <Button icon="pi pi-eye" rounded text aria-label="Voir le détail" onClick={() => router.push(`/commandes/${o.id}`)} />} />
             </DataTable>
         </div>
