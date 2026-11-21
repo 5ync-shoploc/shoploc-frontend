@@ -35,6 +35,10 @@ const AppMenu = () => {
             items: [{ label: 'Commandes à préparer', icon: 'pi pi-fw pi-inbox', to: '/commercant/commandes' }]
         },
         {
+            label: 'Boutique',
+            items: [{ label: 'Catalogue', icon: 'pi pi-fw pi-shopping-bag', to: '/catalogue' }]
+        },
+        {
             label: 'UI Components',
             items: [
                 { label: 'Form Layout', icon: 'pi pi-fw pi-id-card', to: '/uikit/formlayout' },
