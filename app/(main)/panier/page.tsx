@@ -6,11 +6,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
-import { InputNumber } from 'primereact/inputnumber';
 import { Message } from 'primereact/message';
 import { Skeleton } from 'primereact/skeleton';
 import { Toast } from 'primereact/toast';
 import ProductImage from '@/components/catalog/ProductImage';
+import QuantityStepper from '@/components/order/QuantityStepper';
 import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
 import { ApiError, formatPrice } from '@/lib/api/http';
 import { getCart, removeCartItem, updateCartItem, validateCart, type Order, type OrderItem } from '@/lib/api/orders';
@@ -70,22 +70,7 @@ export default function CartPage() {
     };
 
     const quantityTemplate = (item: OrderItem) => (
-        <InputNumber
-            value={item.quantity}
-            onValueChange={(e) => {
-                if (e.value && e.value !== item.quantity) {
-                    runCartAction(() => updateCartItem(user, item.productId, e.value as number));
-                }
-            }}
-            min={1}
-            showButtons
-            buttonLayout="horizontal"
-            decrementButtonIcon="pi pi-minus"
-            incrementButtonIcon="pi pi-plus"
-            inputStyle={{ width: '3.5rem', textAlign: 'center' }}
-            disabled={busy}
-            aria-label={`Quantité de ${item.productName}`}
-        />
+        <QuantityStepper value={item.quantity} min={1} disabled={busy} label={`Quantité de ${item.productName}`} onChange={(quantity) => runCartAction(() => updateCartItem(user, item.productId, quantity))} />
     );
 
     // Emplacement de l'image de l'article (icône par défaut tant que l'API ne renvoie pas d'image)
