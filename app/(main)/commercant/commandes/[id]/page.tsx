@@ -9,6 +9,7 @@ import { Message } from 'primereact/message';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import OrderNumber from '@/components/order/OrderNumber';
 import OrderStatusTag from '@/components/order/OrderStatusTag';
+import RequireRole from '@/components/auth/RequireRole';
 import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
 import { ApiError, formatDate, formatPrice } from '@/lib/api/http';
 import { getMerchantOrder, type MerchantOrderDetail, type OrderItem } from '@/lib/api/orders';
@@ -44,6 +45,7 @@ export default function MerchantOrderDetailPage() {
     }, [user, ready, orderId]);
 
     return (
+        <RequireRole role="COMMERCANT">
         <div className="card">
             <Link href="/commercant/commandes">
                 <i className="pi pi-arrow-left mr-2" />
@@ -81,5 +83,6 @@ export default function MerchantOrderDetailPage() {
                 </>
             )}
         </div>
+        </RequireRole>
     );
 }
