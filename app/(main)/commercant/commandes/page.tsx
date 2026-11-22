@@ -9,6 +9,7 @@ import { Message } from 'primereact/message';
 import TableSearch, { matchesSearch } from '@/components/common/TableSearch';
 import OrderNumber from '@/components/order/OrderNumber';
 import OrderStatusTag from '@/components/order/OrderStatusTag';
+import RequireRole from '@/components/auth/RequireRole';
 import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
 import { ApiError, formatDate, formatPrice } from '@/lib/api/http';
 import { listMerchantOrders, type MerchantOrderSummary } from '@/lib/api/orders';
@@ -41,6 +42,7 @@ export default function MerchantOrdersPage() {
     const open = (o: MerchantOrderSummary) => router.push(`/commercant/commandes/${o.orderId}`);
 
     return (
+        <RequireRole role="COMMERCANT">
         <div className="card">
             <div className="flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                 <h5 className="m-0">Commandes à préparer</h5>
@@ -68,5 +70,6 @@ export default function MerchantOrdersPage() {
                 <Column body={(o: MerchantOrderSummary) => <Button icon="pi pi-eye" rounded text aria-label={`Voir la commande ${o.orderId}`} onClick={() => open(o)} />} style={{ width: '4rem' }} />
             </DataTable>
         </div>
+        </RequireRole>
     );
 }
