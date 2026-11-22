@@ -8,28 +8,29 @@ interface AuthCardProps {
     title: string;
     subtitle: string;
     children: React.ReactNode;
+    /** Lien ou texte affiché sous la carte (ex. « Pas encore de compte ? »). */
+    footer?: React.ReactNode;
 }
 
-/** Cadre commun des pages de connexion et d'inscription : marque SHOPLOC, carte centrée, titre. */
-export default function AuthCard({ title, subtitle, children }: AuthCardProps) {
+/** Cadre commun des pages de connexion et d'inscription : marque SHOPLOC et carte blanche sobre. */
+export default function AuthCard({ title, subtitle, children, footer }: AuthCardProps) {
     const { layoutConfig } = useContext(LayoutContext);
-    const containerClassName = classNames('surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden', { 'p-input-filled': layoutConfig.inputStyle === 'filled' });
+    const containerClassName = classNames('surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden p-3', { 'p-input-filled': layoutConfig.inputStyle === 'filled' });
 
     return (
         <div className={containerClassName}>
-            <div className="flex flex-column align-items-center justify-content-center">
-                <div className="mb-5 text-900 text-3xl font-bold" style={{ letterSpacing: '0.12em' }}>
+            <div className="w-full" style={{ maxWidth: '26rem' }}>
+                <div className="text-center mb-4 text-900 text-2xl font-bold" style={{ letterSpacing: '0.14em' }}>
                     SHOPLOC
                 </div>
-                <div style={{ borderRadius: '56px', padding: '0.3rem', background: 'linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)' }}>
-                    <div className="w-full surface-card py-8 px-5 sm:px-8" style={{ borderRadius: '53px' }}>
-                        <div className="text-center mb-5">
-                            <div className="text-900 text-3xl font-medium mb-3">{title}</div>
-                            <span className="text-600 font-medium">{subtitle}</span>
-                        </div>
-                        {children}
+                <div className="surface-card border-1 surface-border border-round-xl shadow-1 p-5">
+                    <div className="mb-4">
+                        <div className="text-900 text-xl font-semibold mb-1">{title}</div>
+                        <span className="text-500">{subtitle}</span>
                     </div>
+                    {children}
                 </div>
+                {footer && <div className="text-center text-600 mt-4">{footer}</div>}
             </div>
         </div>
     );
