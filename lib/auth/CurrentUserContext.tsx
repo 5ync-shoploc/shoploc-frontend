@@ -10,8 +10,8 @@ interface CurrentUserContextValue {
     user: CurrentUser | null;
     /** false tant que la session mémorisée n'est pas encore relue : attendre avant d'appeler l'API ou de rediriger. */
     ready: boolean;
-    /** Enregistre la session après une connexion réussie (voir lib/api/auth.ts). */
-    login: (tokens: TokenResponse) => void;
+    /** Enregistre la session après une connexion réussie (voir lib/api/auth.ts). Renvoie l'utilisateur connecté. */
+    login: (tokens: TokenResponse) => CurrentUser | null;
     /** Déconnexion : efface la session et renvoie vers la page de connexion. */
     logout: () => void;
 }
@@ -19,7 +19,7 @@ interface CurrentUserContextValue {
 const CurrentUserContext = createContext<CurrentUserContextValue>({
     user: null,
     ready: false,
-    login: () => {},
+    login: () => null,
     logout: () => {}
 });
 
@@ -33,7 +33,11 @@ export function CurrentUserProvider({ children }: { children: React.ReactNode })
         setReady(true);
     }, []);
 
-    const login = (tokens: TokenResponse) => setUser(saveSession(tokens));
+    const login = (tokens: TokenResponse) => {
+        const next = saveSession(tokens);
+        setUser(next);
+        return next;
+    };
 
     const logout = () => {
         clearSession();
