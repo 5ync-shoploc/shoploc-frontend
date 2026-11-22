@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import { Button } from 'primereact/button';
@@ -32,41 +33,59 @@ const RegisterPage = () => {
     });
 
     return (
-        <AuthCard title="Créer un compte" subtitle="Rejoignez ShopLoc">
-            <form onSubmit={submit}>
-                {error && <Message severity="error" className="mb-4 w-full justify-content-start" text={error} />}
+        <AuthCard
+            title="Créer un compte"
+            subtitle="Rejoignez les commerces de proximité."
+            footer={
+                <>
+                    Déjà inscrit ?{' '}
+                    <Link href="/auth/login" className="font-medium">
+                        Se connecter
+                    </Link>
+                </>
+            }
+        >
+            <form onSubmit={submit} className="flex flex-column gap-3">
+                {error && <Message severity="error" className="w-full justify-content-start" text={error} />}
 
-                <div className="grid">
-                    <div className="col-12 md:col-6">
-                        <label htmlFor="lastName" className="block text-900 font-medium mb-2">
+                <div className="flex gap-3">
+                    <div className="flex-1">
+                        <label htmlFor="lastName" className="block text-700 font-medium mb-2">
                             Nom
                         </label>
-                        <InputText id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} required className="w-full mb-4" />
+                        <InputText id="lastName" autoComplete="family-name" value={lastName} onChange={(e) => setLastName(e.target.value)} required className="w-full" />
                     </div>
-                    <div className="col-12 md:col-6">
-                        <label htmlFor="firstName" className="block text-900 font-medium mb-2">
+                    <div className="flex-1">
+                        <label htmlFor="firstName" className="block text-700 font-medium mb-2">
                             Prénom
                         </label>
-                        <InputText id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} required className="w-full mb-4" />
+                        <InputText id="firstName" autoComplete="given-name" value={firstName} onChange={(e) => setFirstName(e.target.value)} required className="w-full" />
                     </div>
                 </div>
 
-                <label htmlFor="email" className="block text-900 font-medium mb-2">
-                    E-mail
-                </label>
-                <InputText id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full mb-4" />
+                <div>
+                    <label htmlFor="email" className="block text-700 font-medium mb-2">
+                        E-mail
+                    </label>
+                    <InputText id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full" />
+                </div>
 
-                <label htmlFor="password" className="block text-900 font-medium mb-2">
-                    Mot de passe
-                </label>
-                <Password inputId="password" value={password} onChange={(e) => setPassword(e.target.value)} toggleMask minLength={8} required className="w-full mb-4" inputClassName="w-full" />
+                <div>
+                    <label htmlFor="password" className="block text-700 font-medium mb-2">
+                        Mot de passe
+                    </label>
+                    <Password inputId="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} toggleMask minLength={8} required className="w-full" inputClassName="w-full" />
+                    <small className="text-500">8 caractères minimum.</small>
+                </div>
 
-                <label htmlFor="role" className="block text-900 font-medium mb-2">
-                    Je suis…
-                </label>
-                <Dropdown id="role" value={role} options={ROLE_OPTIONS} onChange={(e) => setRole(e.value)} className="w-full mb-5" />
+                <div>
+                    <label htmlFor="role" className="block text-700 font-medium mb-2">
+                        Je suis
+                    </label>
+                    <Dropdown inputId="role" value={role} options={ROLE_OPTIONS} onChange={(e) => setRole(e.value)} className="w-full" />
+                </div>
 
-                <Button type="submit" label="Créer mon compte" className="w-full p-3 text-xl" loading={busy} />
+                <Button type="submit" label="Créer mon compte" className="w-full mt-2" loading={busy} />
             </form>
         </AuthCard>
     );

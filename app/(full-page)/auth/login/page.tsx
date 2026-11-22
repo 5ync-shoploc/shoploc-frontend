@@ -34,27 +34,38 @@ const LoginPage = () => {
     });
 
     return (
-        <AuthCard title="Se connecter" subtitle="Accédez à votre espace ShopLoc">
-            <form onSubmit={submit}>
-                {searchParams.get('inscrit') && <Message severity="success" className="mb-4 w-full justify-content-start" text="Compte créé : vous pouvez vous connecter." />}
-                {error && <Message severity="error" className="mb-4 w-full justify-content-start" text={error} />}
+        <AuthCard
+            title="Connexion"
+            subtitle="Accédez à votre espace."
+            footer={
+                <>
+                    Pas encore de compte ?{' '}
+                    <Link href="/auth/register" className="font-medium">
+                        S&apos;inscrire
+                    </Link>
+                </>
+            }
+        >
+            <form onSubmit={submit} className="flex flex-column gap-3">
+                {searchParams.get('inscrit') && <Message severity="success" className="w-full justify-content-start" text="Compte créé : vous pouvez vous connecter." />}
+                {error && <Message severity="error" className="w-full justify-content-start" text={error} />}
 
-                <label htmlFor="email" className="block text-900 text-xl font-medium mb-2">
-                    E-mail
-                </label>
-                <InputText id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full md:w-30rem mb-5" style={{ padding: '1rem' }} />
+                <div>
+                    <label htmlFor="email" className="block text-700 font-medium mb-2">
+                        E-mail
+                    </label>
+                    <InputText id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full" />
+                </div>
 
-                <label htmlFor="password" className="block text-900 font-medium text-xl mb-2">
-                    Mot de passe
-                </label>
-                <Password inputId="password" value={password} onChange={(e) => setPassword(e.target.value)} feedback={false} toggleMask required className="w-full mb-5" inputClassName="w-full p-3 md:w-30rem" />
+                <div>
+                    <label htmlFor="password" className="block text-700 font-medium mb-2">
+                        Mot de passe
+                    </label>
+                    <Password inputId="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} feedback={false} toggleMask required className="w-full" inputClassName="w-full" />
+                </div>
 
-                <Button type="submit" label="Se connecter" className="w-full p-3 text-xl" loading={busy} />
+                <Button type="submit" label="Se connecter" className="w-full mt-2" loading={busy} />
             </form>
-
-            <div className="text-center mt-4">
-                Pas encore de compte ? <Link href="/auth/register">S&apos;inscrire</Link>
-            </div>
         </AuthCard>
     );
 };
