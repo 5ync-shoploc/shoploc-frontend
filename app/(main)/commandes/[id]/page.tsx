@@ -7,10 +7,13 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Message } from 'primereact/message';
 import { ProgressSpinner } from 'primereact/progressspinner';
+import OrderNumber from '@/components/order/OrderNumber';
 import OrderStatusTag from '@/components/order/OrderStatusTag';
+import RequireRole from '@/components/auth/RequireRole';
 import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
 import { ApiError, formatDate, formatPrice } from '@/lib/api/http';
 import { getMyOrder, type Order, type OrderItem } from '@/lib/api/orders';
+import { formatOrderNumber } from '@/lib/order/format';
 
 /** US2 : un client consulte le détail d'une de ses commandes. */
 export default function OrderDetailPage() {
@@ -25,12 +28,16 @@ export default function OrderDetailPage() {
         let cancelled = false;
         setOrder(null);
         setError(null);
+        if (!Number.isInteger(orderId) || orderId <= 0) {
+            setError('Commande introuvable.');
+            return;
+        }
         getMyOrder(user, orderId)
             .then((data) => !cancelled && setOrder(data))
             .catch((e) => {
                 if (cancelled) return;
                 // 404 : la commande n'existe pas, ou elle appartient à un autre client
-                setError(e instanceof ApiError && e.status === 404 ? `La commande n° ${orderId} est introuvable.` : e instanceof ApiError ? e.message : 'Erreur inattendue.');
+                setError(e instanceof ApiError && e.status === 404 ? `La commande ${formatOrderNumber(orderId)} est introuvable.` : e instanceof ApiError ? e.message : 'Erreur inattendue.');
             });
         return () => {
             cancelled = true;
@@ -38,6 +45,7 @@ export default function OrderDetailPage() {
     }, [user, ready, orderId]);
 
     return (
+        <RequireRole role="CLIENT">
         <div className="card">
             <Link href="/commandes">
                 <i className="pi pi-arrow-left mr-2" />
@@ -49,19 +57,15 @@ export default function OrderDetailPage() {
 
             {order && (
                 <>
-                    <h5 className="mt-3">
-                        Commande n° {order.id} <OrderStatusTag status={order.status} />
+                    <h5 className="mt-3 flex align-items-center gap-2">
+                        Commande <OrderNumber id={order.id} /> <OrderStatusTag status={order.status} />
                     </h5>
                     <div className="grid mb-3">
-                        <div className="col-12 md:col-4">
+                        <div className="col-12 md:col-6">
                             <span className="text-500">Passée le</span>
                             <div>{formatDate(order.orderDate)}</div>
                         </div>
-                        <div className="col-12 md:col-4">
-                            <span className="text-500">Créneau de retrait</span>
-                            <div>{formatDate(order.pickupSlot)}</div>
-                        </div>
-                        <div className="col-12 md:col-4">
+                        <div className="col-12 md:col-6">
                             <span className="text-500">Paiement</span>
                             <div>{order.paymentId ? `n° ${order.paymentId}` : 'Non payée'}</div>
                         </div>
@@ -79,5 +83,6 @@ export default function OrderDetailPage() {
                 </>
             )}
         </div>
+        </RequireRole>
     );
 }

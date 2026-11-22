@@ -1,66 +1,50 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { clearSession, loadSession, saveSession } from './session';
+import type { CurrentUser, Role, TokenResponse } from './session';
 
-/** Rôles des utilisateurs ShopLoc (MCD : CLIENT / COMMERCANT / COLLECTIVITE / ADMIN). */
-export type Role = 'CLIENT' | 'COMMERCANT' | 'COLLECTIVITE' | 'ADMIN';
-
-export interface CurrentUser {
-    id: string;
-    role: Role;
-    label: string;
-}
-
-/**
- * IDENTITÉ SIMULÉE, en attendant Keycloak.
- * Ces utilisateurs de démonstration correspondent à ceux reconnus par les services (en-têtes X-User-Id / X-User-Role).
- * Quand Keycloak sera branché, ce contexte sera alimenté par la vraie connexion.
- */
-export const DEMO_USERS: CurrentUser[] = [
-    { id: 'client-1', role: 'CLIENT', label: 'client-1 (client)' },
-    { id: 'client-2', role: 'CLIENT', label: 'client-2 (client)' },
-    { id: 'merchant-1', role: 'COMMERCANT', label: 'merchant-1 (commerçant)' },
-    { id: 'merchant-2', role: 'COMMERCANT', label: 'merchant-2 (commerçant)' }
-];
-
-const STORAGE_KEY = 'shoploc.demoUserId';
+export type { CurrentUser, Role };
 
 interface CurrentUserContextValue {
     user: CurrentUser | null;
-    setUser: (user: CurrentUser | null) => void;
-    /** false tant que l'utilisateur mémorisé n'est pas encore relu : attendre avant d'appeler l'API. */
+    /** false tant que la session mémorisée n'est pas encore relue : attendre avant d'appeler l'API ou de rediriger. */
     ready: boolean;
+    /** Enregistre la session après une connexion réussie (voir lib/api/auth.ts). Renvoie l'utilisateur connecté. */
+    login: (tokens: TokenResponse) => CurrentUser | null;
+    /** Déconnexion : efface la session et renvoie vers la page de connexion. */
+    logout: () => void;
 }
 
-const CurrentUserContext = createContext<CurrentUserContextValue>({ user: null, setUser: () => {}, ready: false });
+const CurrentUserContext = createContext<CurrentUserContextValue>({
+    user: null,
+    ready: false,
+    login: () => null,
+    logout: () => {}
+});
 
 export function CurrentUserProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUserState] = useState<CurrentUser | null>(DEMO_USERS[0]);
+    const [user, setUser] = useState<CurrentUser | null>(null);
     const [ready, setReady] = useState(false);
 
-    // On retrouve l'utilisateur choisi lors de la dernière visite (si le navigateur le permet).
+    // Au chargement de la page, on relit la session mémorisée par le navigateur (si elle n'a pas expiré).
     useEffect(() => {
-        try {
-            const savedId = window.localStorage.getItem(STORAGE_KEY);
-            if (savedId !== null) {
-                setUserState(DEMO_USERS.find((u) => u.id === savedId) ?? null);
-            }
-        } catch {
-            // stockage indisponible : on garde l'utilisateur par défaut
-        }
+        setUser(loadSession());
         setReady(true);
     }, []);
 
-    const setUser = (next: CurrentUser | null) => {
-        setUserState(next);
-        try {
-            window.localStorage.setItem(STORAGE_KEY, next ? next.id : '');
-        } catch {
-            // stockage indisponible : le choix vaut seulement pour cette page
-        }
+    const login = (tokens: TokenResponse) => {
+        const next = saveSession(tokens);
+        setUser(next);
+        return next;
     };
 
-    return <CurrentUserContext.Provider value={{ user, setUser, ready }}>{children}</CurrentUserContext.Provider>;
+    const logout = () => {
+        clearSession();
+        setUser(null);
+    };
+
+    return <CurrentUserContext.Provider value={{ user, ready, login, logout }}>{children}</CurrentUserContext.Provider>;
 }
 
 export function useCurrentUser() {
