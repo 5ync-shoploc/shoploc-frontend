@@ -4,9 +4,10 @@ export function formatOrderNumber(id: number | null | undefined): string {
 }
 
 /**
- * Nom du client affiché au commerçant.
- * Pour l'instant l'order-service ne connaît que l'identifiant du client : le vrai nom viendra de l'identity-service.
+ * Nom du client affiché au commerçant : le nom enregistré dans la commande,
+ * sinon (anciennes commandes) un identifiant raccourci.
  */
-export function clientName(clientId: string): string {
-    return clientId;
+export function clientName(order: { clientId: string; clientName?: string | null }): string {
+    if (order.clientName) return order.clientName;
+    return order.clientId.length > 20 ? `Client ${order.clientId.slice(0, 8)}` : order.clientId;
 }
