@@ -78,6 +78,8 @@ export interface MerchantOrderSummary {
     orderDate: string;
     status: OrderStatus;
     clientId: string;
+    /** Nom du client au moment de la commande ; null pour les anciennes commandes. */
+    clientName: string | null;
     itemCount: number;
     totalAmount: number;
 }
@@ -88,6 +90,7 @@ export interface MerchantOrderDetail {
     orderDate: string;
     status: OrderStatus;
     clientId: string;
+    clientName: string | null;
     items: OrderItem[];
     totalAmount: number;
 }

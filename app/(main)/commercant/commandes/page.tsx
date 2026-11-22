@@ -63,7 +63,7 @@ export default function MerchantOrdersPage() {
             >
                 <Column header="Commande" body={(o: MerchantOrderSummary) => <OrderNumber id={o.orderId} />} />
                 <Column header="Date" body={(o: MerchantOrderSummary) => formatDate(o.orderDate)} />
-                <Column header="Client" body={(o: MerchantOrderSummary) => clientName(o.clientId)} />
+                <Column header="Client" body={(o: MerchantOrderSummary) => clientName(o)} />
                 <Column field="itemCount" header="Articles" />
                 <Column header="Total" body={(o: MerchantOrderSummary) => formatPrice(o.totalAmount)} />
                 <Column header="Statut" body={(o: MerchantOrderSummary) => <OrderStatusTag status={o.status} />} />

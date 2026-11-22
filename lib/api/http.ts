@@ -34,6 +34,10 @@ export async function apiFetch<T>(path: string, user: CurrentUser | null, init: 
         // catalog-service et order-service ne lisent pas encore le token : on leur envoie aussi ces en-têtes.
         headers.set('X-User-Id', user.id);
         headers.set('X-User-Role', user.role);
+        if (user.name) {
+            // encodé pour transporter les accents dans un en-tête HTTP (décodé par l'order-service)
+            headers.set('X-User-Name', encodeURIComponent(user.name));
+        }
     }
     const token = currentAccessToken();
     if (token) {

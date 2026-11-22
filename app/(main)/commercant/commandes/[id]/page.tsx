@@ -64,7 +64,7 @@ export default function MerchantOrderDetailPage() {
                     <div className="grid mb-3">
                         <div className="col-12 md:col-6">
                             <span className="text-500">Client</span>
-                            <div>{clientName(order.clientId)}</div>
+                            <div>{clientName(order)}</div>
                         </div>
                         <div className="col-12 md:col-6">
                             <span className="text-500">Passée le</span>
