@@ -11,6 +11,7 @@ import { Skeleton } from 'primereact/skeleton';
 import { Toast } from 'primereact/toast';
 import ProductImage from '@/components/catalog/ProductImage';
 import QuantityStepper from '@/components/order/QuantityStepper';
+import RequireRole from '@/components/auth/RequireRole';
 import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
 import { ApiError, formatPrice } from '@/lib/api/http';
 import { getCart, removeCartItem, updateCartItem, validateCart, type Order, type OrderItem } from '@/lib/api/orders';
@@ -85,6 +86,7 @@ export default function CartPage() {
     const items = cart?.items ?? [];
 
     return (
+        <RequireRole role="CLIENT">
         <div className="card">
             <Toast ref={toast} />
             <div className="flex justify-content-between align-items-center mb-3">
@@ -125,5 +127,6 @@ export default function CartPage() {
                 </>
             )}
         </div>
+        </RequireRole>
     );
 }

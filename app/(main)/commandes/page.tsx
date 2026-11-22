@@ -11,6 +11,7 @@ import { Toast } from 'primereact/toast';
 import TableSearch, { matchesSearch } from '@/components/common/TableSearch';
 import OrderNumber from '@/components/order/OrderNumber';
 import OrderStatusTag from '@/components/order/OrderStatusTag';
+import RequireRole from '@/components/auth/RequireRole';
 import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
 import { ApiError, formatDate, formatPrice } from '@/lib/api/http';
 import { cancelMyOrder, listMyOrders, type Order } from '@/lib/api/orders';
@@ -95,6 +96,7 @@ export default function MyOrdersPage() {
     );
 
     return (
+        <RequireRole role="CLIENT">
         <div className="card">
             <Toast ref={toast} />
             <ConfirmDialog />
@@ -126,5 +128,6 @@ export default function MyOrdersPage() {
                 <Column body={actionsTemplate} style={{ width: '7rem' }} />
             </DataTable>
         </div>
+        </RequireRole>
     );
 }

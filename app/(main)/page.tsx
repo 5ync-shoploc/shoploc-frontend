@@ -6,11 +6,14 @@ import ClientDashboard from '@/components/dashboard/ClientDashboard';
 import MerchantDashboard from '@/components/dashboard/MerchantDashboard';
 import { useCurrentUser } from '@/lib/auth/CurrentUserContext';
 import { listProducts } from '@/lib/api/products';
+import { getMyProfile } from '@/lib/api/profile';
 
 /** Tableau de bord : son contenu dépend du rôle de l'utilisateur connecté. */
 export default function Dashboard() {
     const { user, ready } = useCurrentUser();
     const [catalogCount, setCatalogCount] = useState<React.ReactNode>('…');
+    // prénom affiché en en-tête ; retombe sur l'e-mail (user.label) tant qu'il n'est pas chargé
+    const [firstName, setFirstName] = useState<string | null>(null);
 
     // nombre d'articles au catalogue (public, identique pour tous les rôles)
     useEffect(() => {
@@ -23,11 +26,26 @@ export default function Dashboard() {
         };
     }, []);
 
+    useEffect(() => {
+        if (!user) {
+            return;
+        }
+        let cancelled = false;
+        getMyProfile(user)
+            .then((profile) => !cancelled && setFirstName(profile.firstName))
+            .catch(() => {
+                // pas grave : l'en-tête retombe sur l'e-mail
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, [user]);
+
     if (!ready) return null;
 
     return (
         <>
-            <h4 className="mb-4">Bonjour {user?.id ?? ''}</h4>
+            <h4 className="mb-4">Bonjour {firstName ?? user?.label ?? ''}</h4>
 
             {user?.role === 'CLIENT' && <ClientDashboard user={user} catalogCount={catalogCount} />}
             {user?.role === 'COMMERCANT' && <MerchantDashboard user={user} catalogCount={catalogCount} />}

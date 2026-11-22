@@ -1,4 +1,5 @@
 import type { CurrentUser } from '@/lib/auth/CurrentUserContext';
+import { currentAccessToken } from '@/lib/auth/session';
 
 /** Erreur renvoyée par l'API (format Problem Details, RFC 9457). */
 export class ApiError extends Error {
@@ -30,8 +31,14 @@ export async function apiFetch<T>(path: string, user: CurrentUser | null, init: 
         headers.set('Content-Type', 'application/json');
     }
     if (user) {
+        // catalog-service et order-service ne lisent pas encore le token : on leur envoie aussi ces en-têtes.
         headers.set('X-User-Id', user.id);
         headers.set('X-User-Role', user.role);
+    }
+    const token = currentAccessToken();
+    if (token) {
+        // identity-service (/users/me) vérifie ce token.
+        headers.set('Authorization', `Bearer ${token}`);
     }
 
     let response: Response;
